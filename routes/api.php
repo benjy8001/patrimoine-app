@@ -82,5 +82,6 @@ Route::prefix('v1')->group(function () {
         // Exchange rates
         Route::get('/exchange-rates', [ExchangeRateController::class, 'index']);
         Route::put('/exchange-rates', [ExchangeRateController::class, 'update']);
+        Route::post('/exchange-rates/refresh', [ExchangeRateController::class, 'refresh']);
     });
 });
