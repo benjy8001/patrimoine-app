@@ -12,26 +12,37 @@ class ExchangeRateService
     {
         $url = rtrim(config('services.frankfurter.url', 'https://api.frankfurter.app'), '/');
 
-        $response = Http::timeout(10)->get("{$url}/latest", ['base' => 'EUR']);
-        $response->throw();
+        try {
+            $response = Http::timeout(10)->get("{$url}/latest", ['base' => 'EUR']);
+            $response->throw();
 
-        $data  = $response->json();
-        $date  = $data['date'];
-        $rates = $data['rates'];
+            $data = $response->json();
 
-        foreach ($rates as $currency => $rate) {
-            ExchangeRate::updateOrCreate(
-                [
-                    'from_currency' => 'EUR',
-                    'to_currency'   => $currency,
-                    'date'          => $date,
-                ],
-                ['rate' => $rate]
-            );
+            if (empty($data['date']) || empty($data['rates'])) {
+                Log::warning('ExchangeRateService: réponse malformée', ['data' => $data]);
+                throw new \RuntimeException('Réponse Frankfurter malformée : clés date/rates manquantes.');
+            }
+
+            $date  = $data['date'];
+            $rates = $data['rates'];
+
+            foreach ($rates as $currency => $rate) {
+                ExchangeRate::updateOrCreate(
+                    [
+                        'from_currency' => 'EUR',
+                        'to_currency'   => $currency,
+                        'date'          => $date,
+                    ],
+                    ['rate' => $rate]
+                );
+            }
+
+            Log::info('ExchangeRateService: ' . count($rates) . ' taux mis à jour pour le ' . $date);
+
+            return ['updated' => count($rates), 'date' => $date];
+        } catch (\Exception $e) {
+            Log::error('ExchangeRateService: échec récupération taux', ['error' => $e->getMessage()]);
+            throw $e;
         }
-
-        Log::info('ExchangeRateService: ' . count($rates) . ' taux mis à jour pour le ' . $date);
-
-        return ['updated' => count($rates), 'date' => $date];
     }
 }

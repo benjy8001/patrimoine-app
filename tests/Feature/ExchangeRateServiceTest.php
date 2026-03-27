@@ -3,6 +3,7 @@
 use App\Services\ExchangeRateService;
 use App\Models\ExchangeRate;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 test('fetchAndStore inserts EUR rates from Frankfurter response', function () {
     Http::fake([
@@ -31,13 +32,32 @@ test('fetchAndStore inserts EUR rates from Frankfurter response', function () {
     )->toBe('1.083800');
 });
 
-test('fetchAndStore throws when Frankfurter API is unavailable', function () {
+test('fetchAndStore logs error and rethrows when API is unavailable', function () {
     Http::fake([
         'api.frankfurter.app/*' => Http::response(null, 503),
     ]);
+
+    Log::spy();
 
     $service = new ExchangeRateService();
 
     expect(fn () => $service->fetchAndStore())
         ->toThrow(\Illuminate\Http\Client\RequestException::class);
+
+    Log::shouldHaveReceived('error')->once();
+});
+
+test('fetchAndStore logs warning and throws on malformed JSON response', function () {
+    Http::fake([
+        'api.frankfurter.app/*' => Http::response(['amount' => 1.0], 200),
+    ]);
+
+    Log::spy();
+
+    $service = new ExchangeRateService();
+
+    expect(fn () => $service->fetchAndStore())
+        ->toThrow(\RuntimeException::class, 'malformée');
+
+    Log::shouldHaveReceived('warning')->once();
 });
