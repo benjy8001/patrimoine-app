@@ -46,3 +46,4 @@ Thumbs.db
 *.log
 *.cache
 npm-debug.log*
+.worktrees/
