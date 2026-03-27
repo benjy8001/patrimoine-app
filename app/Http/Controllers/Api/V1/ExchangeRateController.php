@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExchangeRate;
+use App\Services\ExchangeRateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -31,5 +33,15 @@ class ExchangeRateController extends Controller
         }
 
         return response()->json(['message' => 'Taux de change mis à jour.']);
+    }
+
+    public function refresh(ExchangeRateService $service): JsonResponse
+    {
+        try {
+            $result = $service->fetchAndStore();
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Service de taux de change indisponible.'], 503);
+        }
     }
 }
