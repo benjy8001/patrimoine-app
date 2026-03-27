@@ -40,7 +40,7 @@ class ExchangeRateController extends Controller
         try {
             $result = $service->fetchAndStore();
             return response()->json($result);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['message' => 'Service de taux de change indisponible.'], 503);
         }
     }

@@ -3,12 +3,10 @@
 use App\Models\User;
 use App\Services\ExchangeRateService;
 
-beforeEach(function () {
-    $this->user = User::factory()->create();
-    $this->actingAs($this->user);
-});
-
 test('POST /api/v1/exchange-rates/refresh returns updated count on success', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
     $mock = $this->mock(ExchangeRateService::class);
     $mock->expects('fetchAndStore')->andReturn(['updated' => 3, 'date' => '2026-03-27']);
 
@@ -20,6 +18,9 @@ test('POST /api/v1/exchange-rates/refresh returns updated count on success', fun
 });
 
 test('POST /api/v1/exchange-rates/refresh returns 503 when service throws', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
     $mock = $this->mock(ExchangeRateService::class);
     $mock->expects('fetchAndStore')->andThrow(new \RuntimeException('API down'));
 
@@ -30,8 +31,6 @@ test('POST /api/v1/exchange-rates/refresh returns 503 when service throws', func
 });
 
 test('POST /api/v1/exchange-rates/refresh requires authentication', function () {
-    auth()->forgetGuards();
-
     $response = $this->postJson('/api/v1/exchange-rates/refresh');
 
     $response->assertUnauthorized();
