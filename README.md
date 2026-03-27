@@ -1,6 +1,6 @@
 # PatrimoineApp
 
-Application de gestion de patrimoine personnel — Laravel 13 + React 18 + MySQL/MariaDB.
+Application de gestion de patrimoine personnel — Laravel 12 + React 18 + MySQL/MariaDB.
 
 ## Présentation
 
@@ -18,7 +18,7 @@ PatrimoineApp est une application web full-stack permettant de centraliser et su
 
 | Composant | Technologie |
 |-----------|-------------|
-| Backend | Laravel 13 + PHP 8.3 |
+| Backend | Laravel 12 + PHP 8.3 |
 | Frontend | React 18 + TypeScript + Vite |
 | Base de données | MariaDB (MySQL-compatible) |
 | Auth | Laravel Sanctum (SPA stateful) |
@@ -120,6 +120,63 @@ Email    : demo@patrimoine.local
 Mot de passe : password
 ```
 
+## Guide d'utilisation
+
+### Workflow typique
+
+1. **Connexion** — S'authentifier avec le compte de démo ou créer un nouveau compte
+2. **Configurer ses plateformes** — Ajouter ses établissements financiers (Boursorama, Binance, etc.) depuis la page *Plateformes*
+3. **Ajouter ses actifs** — Créer chaque actif ou passif avec sa catégorie, sa plateforme et sa valeur actuelle
+4. **Suivre les valorisations** — Depuis le détail d'un actif, enregistrer les mises à jour de valeur périodiquement
+5. **Saisir ses revenus** — Depuis la page *Revenus*, saisir les intérêts, dividendes, loyers et plus-values reçus dans l'année
+6. **Générer le rapport fiscal** — Depuis la page *Fiscalité*, générer le rapport annuel et exporter en CSV ou PDF
+7. **Consulter les rapports** — Répartitions par catégorie, plateforme, devise depuis la page *Rapports*
+
+### Pages de l'application
+
+| Page | Description |
+|------|-------------|
+| **Tableau de bord** | Patrimoine net, répartitions par catégorie/plateforme/devise, graphiques d'évolution mensuelle et annuelle, rendement global |
+| **Actifs** | Liste complète, recherche textuelle, filtrage par catégorie et statut (actif/clôturé/en attente) |
+| **Détail actif** | Historique des valorisations, revenus associés, informations du prêt lié, mise à jour de valeur |
+| **Passifs** | Vue dédiée aux dettes et prêts avec détail des remboursements |
+| **Revenus** | Saisie des revenus par type (intérêts, dividendes, loyers, plus-values, crypto, SCPI, crowdlending) et année fiscale |
+| **Fiscalité** | Génération du rapport fiscal annuel avec mapping des cases (2TR, 2DC, 4BE, 4L, 3VG, 3AN), export CSV et PDF |
+| **Rapports** | Rapport annuel consolidé, répartitions par catégorie, exports CSV et PDF |
+| **Historique** | Courbes d'évolution des valorisations dans le temps par actif |
+| **Rappels** | Gestion des rappels de mise à jour d'actifs (fréquences : hebdo, mensuel, trimestriel, annuel) |
+| **Plateformes** | Gestion des établissements financiers de l'utilisateur |
+| **Paramètres** | Devise principale, langue, fuseau horaire, informations du compte |
+
+## Catégories d'actifs
+
+Les catégories sont prédéfinies par le système et non modifiables.
+
+**Actifs (12) :**
+
+| Catégorie | Description |
+|-----------|-------------|
+| Comptes bancaires | Comptes courants, comptes à vue |
+| Livrets & épargne | Livret A, LDDS, CEL, PEL, livrets bancaires |
+| Assurance-vie | Contrats d'assurance-vie en euros ou UC |
+| Actions / PEA / CTO | Portefeuilles d'actions, PEA, compte-titres ordinaire |
+| SCPI | Sociétés Civiles de Placement Immobilier |
+| Immobilier | Biens immobiliers physiques (résidence, locatif) |
+| Crypto-actifs | Bitcoin, Ethereum et autres crypto-monnaies |
+| Crowdfunding | Investissements en financement participatif |
+| Crowdlending | Prêts participatifs (October, Younited, etc.) |
+| Prêts consentis | Prêts accordés à des tiers |
+| Autres plateformes | Actifs sur plateformes non catégorisées |
+| Autres actifs | Actifs divers non couverts par les autres catégories |
+
+**Passifs (3) :**
+
+| Catégorie | Description |
+|-----------|-------------|
+| Prêts bancaires | Crédits immobiliers, prêts auto |
+| Crédits & emprunts | Crédits à la consommation, prêts personnels |
+| Dettes | Dettes diverses envers des tiers |
+
 ## Commandes utiles
 
 ### Docker & projet
@@ -177,7 +234,7 @@ make init-database    # Réinitialisation complète (migrate:fresh --seed)
 │       └── ReminderService.php      # Gestion des rappels
 │
 ├── database/
-│   ├── migrations/                  # 12 migrations
+│   ├── migrations/                  # 15 migrations
 │   ├── seeders/                     # Données initiales + démo
 │   └── factories/                   # Factories pour tests
 │
@@ -230,18 +287,122 @@ make init-database    # Réinitialisation complète (migrate:fresh --seed)
 
 Toutes les routes sont préfixées par `/api/v1/` et protégées par `auth:sanctum` (sauf login/register).
 
-Exemples :
+### Authentification
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `POST` | `/api/v1/login` | Connexion |
+| `POST` | `/api/v1/register` | Inscription |
+| `POST` | `/api/v1/logout` | Déconnexion |
+| `GET` | `/api/v1/user` | Utilisateur connecté |
+
+### Tableau de bord
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/dashboard` | Données agrégées (patrimoine net, répartitions, rendement) |
+| `GET` | `/api/v1/dashboard/chart/monthly` | Données graphique mensuel |
+| `GET` | `/api/v1/dashboard/chart/yearly` | Données graphique annuel |
+
+### Actifs
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/assets` | Liste des actifs (paramètres : `all`, `status`, `category_id`, `search`, `sort`) |
+| `POST` | `/api/v1/assets` | Créer un actif |
+| `PUT` | `/api/v1/assets/{id}` | Modifier un actif |
+| `DELETE` | `/api/v1/assets/{id}` | Supprimer un actif |
+| `GET` | `/api/v1/assets/{id}/valuations` | Historique des valorisations |
+| `POST` | `/api/v1/assets/{id}/valuations` | Enregistrer une valorisation |
+| `GET` | `/api/v1/assets/{id}/income` | Revenus liés à cet actif |
+
+### Catégories d'actifs
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/asset-categories` | Liste des catégories système |
+
+### Plateformes
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/platforms` | Liste des plateformes de l'utilisateur |
+| `POST` | `/api/v1/platforms` | Créer une plateforme |
+| `PUT` | `/api/v1/platforms/{id}` | Modifier une plateforme |
+| `DELETE` | `/api/v1/platforms/{id}` | Supprimer une plateforme |
+
+### Prêts
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/loans` | Liste des prêts |
+| `POST` | `/api/v1/loans` | Créer un prêt |
+| `PUT` | `/api/v1/loans/{id}` | Modifier un prêt |
+| `DELETE` | `/api/v1/loans/{id}` | Supprimer un prêt |
+
+### Revenus
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/income` | Liste des revenus (paramètres : `year`, `type`, `asset_id`) |
+| `POST` | `/api/v1/income` | Créer un revenu |
+| `PUT` | `/api/v1/income/{id}` | Modifier un revenu |
+| `DELETE` | `/api/v1/income/{id}` | Supprimer un revenu |
+
+### Rappels
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/reminders` | Liste des rappels |
+| `POST` | `/api/v1/reminders` | Créer un rappel |
+| `PUT` | `/api/v1/reminders/{id}` | Modifier un rappel |
+| `DELETE` | `/api/v1/reminders/{id}` | Supprimer un rappel |
+
+### Rapports fiscaux
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/tax-reports` | Liste des rapports fiscaux |
+| `POST` | `/api/v1/tax-reports/generate/{year}` | Générer le rapport pour une année |
+| `GET` | `/api/v1/tax-reports/{id}` | Détail d'un rapport fiscal |
+| `GET` | `/api/v1/tax-reports/{id}/export/csv` | Export CSV du rapport fiscal |
+| `GET` | `/api/v1/tax-reports/{id}/export/pdf` | Export PDF du rapport fiscal |
+
+### Rapports
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/reports/annual` | Rapport annuel consolidé |
+| `GET` | `/api/v1/reports/by-category` | Répartition par catégorie |
+| `GET` | `/api/v1/reports/export/csv` | Export CSV |
+| `GET` | `/api/v1/reports/export/pdf` | Export PDF |
+
+### Paramètres
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/settings` | Paramètres de l'utilisateur |
+| `PUT` | `/api/v1/settings` | Mettre à jour les paramètres |
+
+### Taux de change
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/v1/exchange-rates` | Taux de change enregistrés |
+| `PUT` | `/api/v1/exchange-rates` | Mettre à jour les taux de change |
+
+## Tâches planifiées
+
+L'application inclut une commande Artisan pour le traitement des rappels :
+
+```bash
+php artisan app:send-reminder-notifications
+```
+
+Cette commande détecte les rappels arrivés à échéance et les marque comme déclenchés. En production, elle doit être exécutée régulièrement via le scheduler Laravel. Ajouter au crontab du serveur :
 
 ```
-GET    /api/v1/dashboard
-GET    /api/v1/assets?all=true&status=active
-POST   /api/v1/assets
-PUT    /api/v1/assets/{id}
-DELETE /api/v1/assets/{id}
-POST   /api/v1/assets/{id}/valuations
-GET    /api/v1/income?year=2024
-POST   /api/v1/tax-reports/generate/2024
-GET    /api/v1/tax-reports/{id}/export/csv
+* * * * * cd /chemin/vers/le/projet && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ## Tests

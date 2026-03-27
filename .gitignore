@@ -1,0 +1,48 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Build output
+/public/build/
+/public/hot/
+/public/storage
+
+# Laravel storage (keep structure via .gitkeep)
+/storage/*.key
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Laravel bootstrap cache
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitkeep
+
+# Testing
+.phpunit.result.cache
+coverage/
+
+# IDE / OS
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# Windows Zone.Identifier files
+*:Zone.Identifier
+
+# Misc
+*.log
+*.cache
+npm-debug.log*
