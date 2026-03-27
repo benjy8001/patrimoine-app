@@ -18,7 +18,7 @@ class ExchangeRateService
 
             $data = $response->json();
 
-            if (empty($data['date']) || empty($data['rates'])) {
+            if (!isset($data['date'], $data['rates']) || !is_array($data['rates'])) {
                 Log::warning('ExchangeRateService: réponse malformée', ['data' => $data]);
                 throw new \RuntimeException('Réponse Frankfurter malformée : clés date/rates manquantes.');
             }
@@ -37,7 +37,7 @@ class ExchangeRateService
                 );
             }
 
-            Log::info('ExchangeRateService: ' . count($rates) . ' taux mis à jour pour le ' . $date);
+            Log::info('ExchangeRateService: taux mis à jour', ['count' => count($rates), 'date' => $date]);
 
             return ['updated' => count($rates), 'date' => $date];
         } catch (\Exception $e) {

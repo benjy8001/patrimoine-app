@@ -44,7 +44,9 @@ test('fetchAndStore logs error and rethrows when API is unavailable', function (
     expect(fn () => $service->fetchAndStore())
         ->toThrow(\Illuminate\Http\Client\RequestException::class);
 
-    Log::shouldHaveReceived('error')->once();
+    Log::shouldHaveReceived('error')
+        ->once()
+        ->withArgs(fn ($message) => str_contains($message, 'ExchangeRateService'));
 });
 
 test('fetchAndStore logs warning and throws on malformed JSON response', function () {
