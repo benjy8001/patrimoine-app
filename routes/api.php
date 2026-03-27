@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\AssetImportController;
+use App\Http\Controllers\Api\V1\AttachmentController;
 use App\Http\Controllers\Api\V1\ExchangeRateController;
 
 Route::prefix('v1')->group(function () {
@@ -38,6 +39,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/assets/{asset}/valuations', [ValuationController::class, 'store']);
         Route::get('/assets/{asset}/valuations', [ValuationController::class, 'index']);
         Route::get('/assets/{asset}/income', [IncomeEntryController::class, 'byAsset']);
+        Route::post('/assets/{asset}/attachments', [AttachmentController::class, 'store']);
+        Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download']);
+        Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy']);
 
         // Asset categories
         Route::get('/asset-categories', [AssetCategoryController::class, 'index']);

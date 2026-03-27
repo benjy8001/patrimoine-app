@@ -60,6 +60,15 @@ export interface AssetMeta {
   [key: string]: unknown
 }
 
+export interface Attachment {
+  id: number
+  original_name: string
+  mime_type: string | null
+  size: number | null
+  notes: string | null
+  created_at: string
+}
+
 export interface Asset {
   id: number
   name: string
@@ -85,6 +94,7 @@ export interface Asset {
   loan?: Loan
   valuations?: AssetValuation[]
   income_entries?: IncomeEntry[]
+  attachments?: Attachment[]
 }
 
 export interface AssetValuation {

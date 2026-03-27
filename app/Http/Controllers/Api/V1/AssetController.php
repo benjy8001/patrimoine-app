@@ -57,7 +57,7 @@ class AssetController extends Controller
     {
         $this->authorize('view', $asset);
 
-        return new AssetResource($asset->load(['category', 'platform', 'loan', 'valuations', 'incomeEntries']));
+        return new AssetResource($asset->load(['category', 'platform', 'loan', 'valuations', 'incomeEntries', 'attachments']));
     }
 
     public function update(UpdateAssetRequest $request, Asset $asset): AssetResource

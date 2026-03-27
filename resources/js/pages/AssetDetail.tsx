@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/shared/LoadingSpinner'
 import StatusBadge from '../components/shared/StatusBadge'
 import CurrencyDisplay from '../components/shared/CurrencyDisplay'
 import QuickUpdateModal from '../components/assets/QuickUpdateModal'
+import AttachmentsCard from '../components/assets/AttachmentsCard'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
 import { Card, CardHeader, CardTitle } from '../components/shared/Card'
 import EvolutionLineChart from '../components/charts/EvolutionLineChart'
@@ -164,6 +165,13 @@ export default function AssetDetail() {
           <p className="text-sm text-muted-foreground whitespace-pre-wrap">{asset.notes}</p>
         </Card>
       )}
+
+      {/* Attachments */}
+      <AttachmentsCard
+        assetId={Number(id)}
+        attachments={asset.attachments ?? []}
+        onChanged={refetch}
+      />
 
       {/* Modals */}
       {showUpdate && (

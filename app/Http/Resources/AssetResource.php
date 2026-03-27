@@ -44,6 +44,14 @@ class AssetResource extends JsonResource
             'loan'              => $this->whenLoaded('loan', fn() => $this->loan->first()),
             'valuations'        => $this->whenLoaded('valuations', fn() => $this->valuations->take(24)),
             'income_entries'    => $this->whenLoaded('incomeEntries', fn() => $this->incomeEntries),
+            'attachments'       => $this->whenLoaded('attachments', fn() => $this->attachments->map(fn($a) => [
+                'id'            => $a->id,
+                'original_name' => $a->original_name,
+                'mime_type'     => $a->mime_type,
+                'size'          => $a->size,
+                'notes'         => $a->notes,
+                'created_at'    => $a->created_at?->toIso8601String(),
+            ])),
         ];
     }
 }
