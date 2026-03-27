@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ReminderController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SettingController;
+use App\Http\Controllers\Api\V1\AssetImportController;
 use App\Http\Controllers\Api\V1\ExchangeRateController;
 
 Route::prefix('v1')->group(function () {
@@ -31,6 +32,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboard/chart/yearly', [DashboardController::class, 'yearlyChart']);
 
         // Assets
+        Route::post('/assets/import/preview', [AssetImportController::class, 'preview']);
+        Route::post('/assets/import',         [AssetImportController::class, 'import']);
         Route::apiResource('assets', AssetController::class);
         Route::post('/assets/{asset}/valuations', [ValuationController::class, 'store']);
         Route::get('/assets/{asset}/valuations', [ValuationController::class, 'index']);

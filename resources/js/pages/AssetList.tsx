@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom'
 import { assetsApi } from '../api/assets'
 import { useQuery } from '../hooks/useQuery'
 import AssetTable from '../components/assets/AssetTable'
+import ImportCsvModal from '../components/assets/ImportCsvModal'
 import LoadingSpinner from '../components/shared/LoadingSpinner'
 import EmptyState from '../components/shared/EmptyState'
-import { Package, Plus, Search, X } from 'lucide-react'
+import { Package, Plus, Search, Upload, X } from 'lucide-react'
 import { Card } from '../components/shared/Card'
 import CurrencyDisplay from '../components/shared/CurrencyDisplay'
 import type { Asset } from '../types'
@@ -15,6 +16,7 @@ export default function AssetList() {
   const [statusFilter, setStatus]   = useState('')
   const [catFilter, setCat]         = useState('')
   const [liabilityFilter, setLiab]  = useState('false')
+  const [showImport, setShowImport] = useState(false)
 
   const isLiabilityParam = liabilityFilter === '' ? undefined : liabilityFilter
 
@@ -59,13 +61,22 @@ export default function AssetList() {
             </div>
           )}
         </div>
-        <Link
-          to="/assets/new"
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Nouvel actif
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 border border-border px-4 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            Importer CSV
+          </button>
+          <Link
+            to="/assets/new"
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Nouvel actif
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -125,6 +136,12 @@ export default function AssetList() {
           <AssetTable assets={assets} onDelete={handleDelete} />
         )}
       </Card>
+
+      <ImportCsvModal
+        open={showImport}
+        onOpenChange={setShowImport}
+        onSuccess={refetch}
+      />
     </div>
   )
 }
