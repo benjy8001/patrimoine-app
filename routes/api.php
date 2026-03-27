@@ -69,6 +69,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/reports/by-category', [ReportController::class, 'byCategory']);
         Route::get('/reports/export/csv', [ReportController::class, 'exportCsv']);
         Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf']);
+        Route::get('/reports/export/xlsx', [ReportController::class, 'exportXlsx']);
 
         // Settings
         Route::get('/settings', [SettingController::class, 'index']);

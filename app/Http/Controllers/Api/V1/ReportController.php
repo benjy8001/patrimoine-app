@@ -47,4 +47,9 @@ class ReportController extends Controller
     {
         return $exportService->exportAssetsPdf($request->user());
     }
+
+    public function exportXlsx(Request $request, ExportService $exportService): mixed
+    {
+        return $exportService->exportAssetsAsXlsx($request->user());
+    }
 }

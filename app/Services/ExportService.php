@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Exports\AssetsExport;
 use App\Models\Asset;
 use App\Models\IncomeEntry;
 use App\Models\TaxReport;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ExportService
 {
@@ -85,6 +88,16 @@ class ExportService
         ]);
 
         return $this->buildCsvContent($headers, $rows);
+    }
+
+    // ----------------------------------------------------------------
+    // Excel Exports
+    // ----------------------------------------------------------------
+
+    public function exportAssetsAsXlsx(User $user): BinaryFileResponse
+    {
+        $filename = 'patrimoine_' . now()->format('Y-m-d') . '.xlsx';
+        return Excel::download(new AssetsExport($user), $filename);
     }
 
     // ----------------------------------------------------------------

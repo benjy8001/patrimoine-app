@@ -3,7 +3,7 @@ import AllocationPieChart from '../components/charts/AllocationPieChart'
 import { useQuery } from '../hooks/useQuery'
 import { dashboardApi } from '../api/dashboard'
 import LoadingSpinner from '../components/shared/LoadingSpinner'
-import { Download, FileText } from 'lucide-react'
+import { Download, FileSpreadsheet, FileText } from 'lucide-react'
 import { formatCurrency } from '../utils/format'
 
 export default function Reports() {
@@ -18,6 +18,9 @@ export default function Reports() {
         <div className="flex items-center gap-2">
           <a href="/api/v1/reports/export/csv" className="flex items-center gap-2 px-4 py-2 border border-border rounded-md text-sm hover:bg-accent transition-colors">
             <Download className="w-3.5 h-3.5" /> Export CSV
+          </a>
+          <a href="/api/v1/reports/export/xlsx" className="flex items-center gap-2 px-4 py-2 border border-border rounded-md text-sm hover:bg-accent transition-colors text-green-600 border-green-600/30 hover:bg-green-600/5">
+            <FileSpreadsheet className="w-3.5 h-3.5" /> Export Excel
           </a>
           <a href="/api/v1/reports/export/pdf" className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
             <FileText className="w-3.5 h-3.5" /> Export PDF
