@@ -41,19 +41,21 @@ export function useProjection() {
 
   // Auto-simulate on settings change (debounced 500ms)
   useEffect(() => {
+    let cancelled = false
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       if (!initializedRef.current) return
-      let cancelled = false
       setIsLoading(true)
       setError(null)
       projectionsApi.simulate(settings)
         .then(res => { if (!cancelled) setResult(res) })
         .catch(() => { if (!cancelled) setError('Erreur lors de la simulation') })
         .finally(() => { if (!cancelled) setIsLoading(false) })
-      return () => { cancelled = true }
     }, 500)
-    return () => clearTimeout(debounceRef.current)
+    return () => {
+      cancelled = true
+      clearTimeout(debounceRef.current)
+    }
   }, [settings])
 
   const saveSettings = useCallback(async () => {
