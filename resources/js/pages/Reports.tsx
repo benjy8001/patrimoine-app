@@ -5,6 +5,7 @@ import { dashboardApi } from '../api/dashboard'
 import LoadingSpinner from '../components/shared/LoadingSpinner'
 import { Download, FileSpreadsheet, FileText } from 'lucide-react'
 import { formatCurrency } from '../utils/format'
+import ProjectionsSection from './Reports/ProjectionsSection'
 
 export default function Reports() {
   const { data, isLoading } = useQuery(['dashboard'], () => dashboardApi.get())
@@ -86,6 +87,11 @@ export default function Reports() {
           </Card>
         </>
       )}
+
+      {/* Projections */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <ProjectionsSection />
+      </div>
     </div>
   )
 }
