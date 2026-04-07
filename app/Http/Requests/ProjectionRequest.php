@@ -20,7 +20,7 @@ class ProjectionRequest extends FormRequest
             'inflation_rate'                      => 'nullable|numeric|min:0|max:20',
             'category_rates'                      => 'required|array',
             'category_rates.*.growth_rate'        => 'required|numeric|min:0|max:100',
-            'category_rates.*.monthly_savings'    => 'required|numeric|min:0',
+            'category_rates.*.monthly_savings'    => 'required|numeric|min:0|max:100000',
         ];
     }
 }

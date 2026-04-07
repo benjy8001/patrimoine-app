@@ -278,3 +278,18 @@ test('projection endpoints require authentication', function () {
     $this->putJson('/api/v1/projections/settings', [])->assertUnauthorized();
     $this->postJson('/api/v1/projections/simulate', [])->assertUnauthorized();
 });
+
+test('GET /projections/settings does not expose another user settings', function () {
+    $otherUser = User::factory()->create();
+    \App\Models\Setting::create([
+        'user_id' => $otherUser->id,
+        'key'     => 'projection_settings',
+        'value'   => ['horizon_years' => 99],
+    ]);
+
+    $this->actingAs($this->user);
+    $response = $this->getJson('/api/v1/projections/settings');
+
+    $response->assertOk();
+    expect($response->json('settings'))->toBeNull();
+});
