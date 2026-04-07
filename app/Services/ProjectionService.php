@@ -22,6 +22,11 @@ class ProjectionService
     public function simulate(array $params): array
     {
         $horizonYears   = (int) $params['horizon_years'];
+
+        if ($horizonYears < 1) {
+            throw new \InvalidArgumentException('horizon_years must be a positive integer.');
+        }
+
         $inflationRate  = (float) ($params['inflation_rate'] ?? 0) / 100;
         $categoryRates  = $params['category_rates'] ?? [];
 
@@ -105,7 +110,6 @@ class ProjectionService
         return $this->user->assets()
             ->active()
             ->assets()   // scopeAssets: where is_liability = false
-            ->with('category')
             ->get()
             ->groupBy('asset_category_id')
             ->map(fn($assets) => round(
