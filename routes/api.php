@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\AssetImportController;
 use App\Http\Controllers\Api\V1\AttachmentController;
 use App\Http\Controllers\Api\V1\ExchangeRateController;
+use App\Http\Controllers\Api\V1\ProjectionController;
 
 Route::prefix('v1')->group(function () {
     // Auth (public)
@@ -83,5 +84,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/exchange-rates', [ExchangeRateController::class, 'index']);
         Route::put('/exchange-rates', [ExchangeRateController::class, 'update']);
         Route::post('/exchange-rates/refresh', [ExchangeRateController::class, 'refresh']);
+
+        // Projections
+        Route::get('/projections/settings', [ProjectionController::class, 'getSettings']);
+        Route::put('/projections/settings', [ProjectionController::class, 'saveSettings']);
+        Route::post('/projections/simulate', [ProjectionController::class, 'simulate']);
     });
 });

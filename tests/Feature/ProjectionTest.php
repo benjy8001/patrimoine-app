@@ -169,3 +169,112 @@ test('throws InvalidArgumentException when horizon_years is less than 1', functi
         'category_rates' => [],
     ]))->toThrow(\InvalidArgumentException::class, 'horizon_years must be a positive integer.');
 });
+
+// --- Tests ProjectionController ---
+
+test('GET /projections/settings returns null settings when none saved', function () {
+    $this->actingAs($this->user);
+
+    $response = $this->getJson('/api/v1/projections/settings');
+
+    $response->assertOk();
+    expect($response->json('settings'))->toBeNull()
+        ->and($response->json('categories'))->toBeArray();
+});
+
+test('GET /projections/settings returns saved settings', function () {
+    $this->actingAs($this->user);
+    ($this->makeAsset)(['current_value' => 50000]);
+
+    // Sauvegarder des paramètres
+    $this->putJson('/api/v1/projections/settings', [
+        'horizon_years'  => 15,
+        'inflation_rate' => 2.5,
+        'category_rates' => [
+            (string) $this->category->id => ['growth_rate' => 5, 'monthly_savings' => 200],
+        ],
+    ])->assertOk();
+
+    $response = $this->getJson('/api/v1/projections/settings');
+
+    $response->assertOk();
+    expect($response->json('settings.horizon_years'))->toBe(15)
+        ->and($response->json('settings.inflation_rate'))->toBe(2.5);
+});
+
+test('GET /projections/settings returns categories user has assets in', function () {
+    $this->actingAs($this->user);
+    ($this->makeAsset)(['current_value' => 50000]);
+
+    $response = $this->getJson('/api/v1/projections/settings');
+
+    $response->assertOk();
+    expect($response->json('categories'))->toHaveCount(1)
+        ->and($response->json('categories.0.id'))->toBe($this->category->id)
+        ->and($response->json('categories.0.name'))->toBe('Livrets');
+});
+
+test('PUT /projections/settings persists parameters', function () {
+    $this->actingAs($this->user);
+
+    $response = $this->putJson('/api/v1/projections/settings', [
+        'horizon_years'  => 20,
+        'inflation_rate' => 2.0,
+        'category_rates' => [
+            (string) $this->category->id => ['growth_rate' => 7, 'monthly_savings' => 500],
+        ],
+    ]);
+
+    $response->assertOk();
+    expect($response->json('message'))->toBe('Paramètres sauvegardés.');
+
+    $this->assertDatabaseHas('settings', [
+        'user_id' => $this->user->id,
+        'key'     => 'projection_settings',
+    ]);
+});
+
+test('POST /projections/simulate returns data points', function () {
+    $this->actingAs($this->user);
+    ($this->makeAsset)(['current_value' => 100000]);
+
+    $response = $this->postJson('/api/v1/projections/simulate', [
+        'horizon_years'  => 5,
+        'inflation_rate' => 0,
+        'category_rates' => [
+            (string) $this->category->id => ['growth_rate' => 5, 'monthly_savings' => 0],
+        ],
+    ]);
+
+    $response->assertOk();
+    expect($response->json('data_points'))->toHaveCount(5)
+        ->and($response->json('current_value'))->toBe(100000.0)
+        ->and($response->json('projected_value'))->toBeGreaterThan(100000.0);
+});
+
+test('POST /projections/simulate requires horizon_years', function () {
+    $this->actingAs($this->user);
+
+    $this->postJson('/api/v1/projections/simulate', [
+        'inflation_rate' => 0,
+        'category_rates' => [],
+    ])->assertUnprocessable();
+});
+
+test('POST /projections/simulate rejects invalid growth rate', function () {
+    $this->actingAs($this->user);
+
+    $this->postJson('/api/v1/projections/simulate', [
+        'horizon_years'  => 10,
+        'inflation_rate' => 0,
+        'category_rates' => [
+            '1' => ['growth_rate' => 150, 'monthly_savings' => 0],  // > 100
+        ],
+    ])->assertUnprocessable();
+});
+
+test('projection endpoints require authentication', function () {
+    $this->getJson('/api/v1/projections/settings')->assertUnauthorized();
+    $this->putJson('/api/v1/projections/settings', [])->assertUnauthorized();
+    $this->postJson('/api/v1/projections/simulate', [])->assertUnauthorized();
+});
