@@ -7,7 +7,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import type { ProjectionCategory, ProjectionResult } from '../../types'
+import { formatCurrency } from '../../utils/format'
+import type { ProjectionCategory, ProjectionDataPoint, ProjectionResult } from '../../types'
 
 interface Props {
   result: ProjectionResult
@@ -15,42 +16,59 @@ interface Props {
   currency?: string
 }
 
-function formatEur(value: number): string {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR',
-    maximumFractionDigits: 0,
-  }).format(value)
+function formatShort(value: number, currency: string): string {
+  if (value >= 1_000_000) {
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(value / 1_000_000) + ' M' + (currency === 'EUR' ? '€' : currency)
+  }
+  if (value >= 1_000) {
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(value / 1_000) + ' k' + (currency === 'EUR' ? '€' : currency)
+  }
+  return formatCurrency(value, currency)
 }
 
-function formatEurShort(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)} M€`
-  if (value >= 1_000)     return `${Math.round(value / 1_000)} k€`
-  return `${Math.round(value)} €`
-}
-
-interface TooltipPayload {
-  name: string
-  value: number
-  color: string
+interface ChartDataPoint {
+  year: number
+  total: number
+  breakdown?: Record<string, number>
 }
 
 interface CustomTooltipProps {
   active?: boolean
-  payload?: TooltipPayload[]
+  payload?: Array<{ value: number }>
   label?: number
+  chartData: ChartDataPoint[]
+  categories: ProjectionCategory[]
+  currency: string
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, label, chartData, categories, currency }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
+
+  const dataPoint = chartData.find(d => d.year === label)
+  const total = payload[0]?.value ?? 0
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-md p-3 text-sm">
-      <p className="font-semibold text-gray-700 mb-1">Année {label}</p>
-      {payload.map(entry => (
-        <p key={entry.name} style={{ color: entry.color }}>
-          {entry.name} : {formatEur(entry.value)}
-        </p>
-      ))}
+    <div className="bg-white border border-gray-200 rounded-lg shadow-md p-3 text-sm min-w-[160px]">
+      <p className="font-semibold text-gray-700 mb-1">
+        {label === 0 ? "Aujourd'hui" : `Année ${label}`}
+      </p>
+      <p className="text-blue-600 font-medium mb-1">
+        Total : {formatCurrency(total, currency)}
+      </p>
+      {dataPoint?.breakdown && categories.length > 0 && (
+        <div className="border-t border-gray-100 pt-1 mt-1 space-y-0.5">
+          {categories.map(cat => {
+            const val = dataPoint.breakdown?.[String(cat.id)]
+            if (val == null) return null
+            return (
+              <p key={cat.id} className="text-gray-500 text-xs flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                {cat.name} : {formatCurrency(val, currency)}
+              </p>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -59,7 +77,7 @@ export default function ProjectionChart({ result, categories, currency = 'EUR' }
   const { data_points, current_value, projected_value, cumulative_savings, inflation_adjusted } = result
 
   // Prepend year 0 (current state)
-  const chartData = [
+  const chartData: ChartDataPoint[] = [
     { year: 0, total: current_value },
     ...data_points,
   ]
@@ -76,11 +94,19 @@ export default function ProjectionChart({ result, categories, currency = 'EUR' }
             tick={{ fontSize: 11, fill: '#9ca3af' }}
           />
           <YAxis
-            tickFormatter={formatEurShort}
+            tickFormatter={v => formatShort(v, currency)}
             tick={{ fontSize: 11, fill: '#9ca3af' }}
             width={64}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip
+            content={
+              <CustomTooltip
+                chartData={chartData}
+                categories={categories}
+                currency={currency}
+              />
+            }
+          />
           <Line
             type="monotone"
             dataKey="total"
@@ -97,18 +123,18 @@ export default function ProjectionChart({ result, categories, currency = 'EUR' }
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="bg-blue-50 rounded-lg p-3 text-center">
           <p className="text-xs text-blue-600 font-medium">Valeur actuelle</p>
-          <p className="text-base font-bold text-blue-700">{formatEur(current_value)}</p>
+          <p className="text-base font-bold text-blue-700">{formatCurrency(current_value, currency)}</p>
         </div>
         <div className="bg-emerald-50 rounded-lg p-3 text-center">
           <p className="text-xs text-emerald-600 font-medium">
             Valeur projetée{inflation_adjusted ? ' (réelle)' : ''}
           </p>
-          <p className="text-base font-bold text-emerald-700">{formatEur(projected_value)}</p>
+          <p className="text-base font-bold text-emerald-700">{formatCurrency(projected_value, currency)}</p>
         </div>
         {cumulative_savings > 0 && (
           <div className="bg-amber-50 rounded-lg p-3 text-center">
             <p className="text-xs text-amber-600 font-medium">Épargne cumulée</p>
-            <p className="text-base font-bold text-amber-700">{formatEur(cumulative_savings)}</p>
+            <p className="text-base font-bold text-amber-700">{formatCurrency(cumulative_savings, currency)}</p>
           </div>
         )}
       </div>

@@ -79,7 +79,7 @@ export default function ProjectionParams({
                 max={120}
                 value={settings.target_age ?? ''}
                 placeholder="—"
-                onChange={e => onTargetAgeChange(Number(e.target.value))}
+                onChange={e => { if (e.target.value) onTargetAgeChange(Number(e.target.value)) }}
                 className="w-full border border-gray-200 rounded px-2 py-1.5 text-sm"
               />
             </div>
