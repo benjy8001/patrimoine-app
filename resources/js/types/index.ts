@@ -255,3 +255,44 @@ export interface PaginatedResponse<T> {
   per_page: number
   total: number
 }
+
+// --- Projections ---
+
+export interface CategoryProjectionRate {
+  growth_rate: number
+  monthly_savings: number
+}
+
+export interface ProjectionSettings {
+  horizon_years: number
+  target_age: number | null
+  current_age: number | null
+  inflation_rate: number
+  category_rates: Record<string, CategoryProjectionRate>
+}
+
+export interface ProjectionDataPoint {
+  year: number
+  total: number
+  breakdown: Record<string, number>
+}
+
+export interface ProjectionResult {
+  current_value: number
+  projected_value: number
+  data_points: ProjectionDataPoint[]
+  cumulative_savings: number
+  inflation_adjusted: boolean
+}
+
+export interface ProjectionCategory {
+  id: number
+  name: string
+  color: string
+  icon: string
+}
+
+export interface ProjectionSettingsResponse {
+  settings: ProjectionSettings | null
+  categories: ProjectionCategory[]
+}
