@@ -160,3 +160,12 @@ test('excludes liabilities from projection', function () {
 
     expect($result['current_value'])->toBe(100000.0);
 });
+
+test('throws InvalidArgumentException when horizon_years is less than 1', function () {
+    $service = new ProjectionService($this->user);
+    expect(fn () => $service->simulate([
+        'horizon_years'  => 0,
+        'inflation_rate' => 0,
+        'category_rates' => [],
+    ]))->toThrow(\InvalidArgumentException::class, 'horizon_years must be a positive integer.');
+});
