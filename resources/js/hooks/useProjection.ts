@@ -22,26 +22,36 @@ export function useProjection() {
   const [isLoading, setIsLoading]     = useState(false)
   const [isSaving, setIsSaving]       = useState(false)
   const [error, setError]             = useState<string | null>(null)
-  const debounceRef                   = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef                   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const initializedRef                = useRef(false)
 
   // Load saved settings and categories on mount
   useEffect(() => {
-    projectionsApi.getSettings().then(({ settings: saved, categories: cats }) => {
-      setCategories(cats)
-      if (saved) setSettings(saved)
-    })
+    projectionsApi.getSettings()
+      .then(({ settings: saved, categories: cats }) => {
+        setCategories(cats)
+        if (saved) setSettings(saved)
+        initializedRef.current = true
+      })
+      .catch(() => {
+        initializedRef.current = true
+        setError('Impossible de charger les paramètres')
+      })
   }, [])
 
   // Auto-simulate on settings change (debounced 500ms)
   useEffect(() => {
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
+      if (!initializedRef.current) return
+      let cancelled = false
       setIsLoading(true)
       setError(null)
       projectionsApi.simulate(settings)
-        .then(setResult)
-        .catch(() => setError('Erreur lors de la simulation'))
-        .finally(() => setIsLoading(false))
+        .then(res => { if (!cancelled) setResult(res) })
+        .catch(() => { if (!cancelled) setError('Erreur lors de la simulation') })
+        .finally(() => { if (!cancelled) setIsLoading(false) })
+      return () => { cancelled = true }
     }, 500)
     return () => clearTimeout(debounceRef.current)
   }, [settings])
@@ -50,6 +60,8 @@ export function useProjection() {
     setIsSaving(true)
     try {
       await projectionsApi.saveSettings(settings)
+    } catch {
+      setError('Impossible de sauvegarder les paramètres')
     } finally {
       setIsSaving(false)
     }
@@ -96,7 +108,13 @@ export function useProjection() {
   }, [])
 
   const updateCurrentAge = useCallback((age: number | null) => {
-    setSettings(prev => ({ ...prev, current_age: age }))
+    setSettings(prev => {
+      const updated = { ...prev, current_age: age }
+      if (age != null) {
+        updated.target_age = age + prev.horizon_years
+      }
+      return updated
+    })
   }, [])
 
   return {
