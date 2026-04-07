@@ -19,7 +19,7 @@ export function useProjection() {
   const [settings, setSettings]       = useState<ProjectionSettings>(DEFAULT_SETTINGS)
   const [categories, setCategories]   = useState<ProjectionCategory[]>([])
   const [result, setResult]           = useState<ProjectionResult | null>(null)
-  const [isLoading, setIsLoading]     = useState(false)
+  const [isLoading, setIsLoading]     = useState(true)
   const [isSaving, setIsSaving]       = useState(false)
   const [error, setError]             = useState<string | null>(null)
   const debounceRef                   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -31,11 +31,13 @@ export function useProjection() {
       .then(({ settings: saved, categories: cats }) => {
         setCategories(cats)
         if (saved) setSettings(saved)
+        setIsLoading(false)
         initializedRef.current = true
       })
       .catch(() => {
-        initializedRef.current = true
         setError('Impossible de charger les paramètres')
+        setIsLoading(false)
+        initializedRef.current = true
       })
   }, [])
 
