@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\ProjectionController;
 use App\Http\Controllers\Api\V1\BudgetSummaryController;
 use App\Http\Controllers\Api\V1\ExpenseCategoryController;
 use App\Http\Controllers\Api\V1\ExpenseController;
+use App\Http\Controllers\Api\V1\BudgetController;
 
 Route::prefix('v1')->group(function () {
     // Auth (public)
@@ -105,7 +106,12 @@ Route::prefix('v1')->group(function () {
         Route::put('/expenses/{expense}', [ExpenseController::class, 'update']);
         Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy']);
 
-        // Budget
+        // Budgets
+        Route::get('/budgets', [BudgetController::class, 'index']);
+        Route::post('/budgets', [BudgetController::class, 'store']);
+        Route::delete('/budgets/{budget}', [BudgetController::class, 'destroy']);
+
+        // Budget summary
         Route::get('/budget/summary', [BudgetSummaryController::class, 'summary']);
         Route::get('/budget/evolution', [BudgetSummaryController::class, 'evolution']);
     });
