@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\AttachmentController;
 use App\Http\Controllers\Api\V1\ExchangeRateController;
 use App\Http\Controllers\Api\V1\ProjectionController;
 use App\Http\Controllers\Api\V1\BudgetSummaryController;
+use App\Http\Controllers\Api\V1\ExpenseCategoryController;
 
 Route::prefix('v1')->group(function () {
     // Auth (public)
@@ -90,6 +91,12 @@ Route::prefix('v1')->group(function () {
         Route::get('/projections/settings', [ProjectionController::class, 'getSettings']);
         Route::put('/projections/settings', [ProjectionController::class, 'saveSettings']);
         Route::post('/projections/simulate', [ProjectionController::class, 'simulate']);
+
+        // Expense Categories
+        Route::get('/expense-categories', [ExpenseCategoryController::class, 'index']);
+        Route::post('/expense-categories', [ExpenseCategoryController::class, 'store']);
+        Route::put('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'update']);
+        Route::delete('/expense-categories/{expenseCategory}', [ExpenseCategoryController::class, 'destroy']);
 
         // Budget
         Route::get('/budget/summary', [BudgetSummaryController::class, 'summary']);
