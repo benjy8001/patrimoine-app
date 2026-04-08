@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AssetCategorySeeder::class,
+            ExpenseCategorySeeder::class,
             DemoDataSeeder::class,
         ]);
     }
