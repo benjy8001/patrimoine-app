@@ -15,6 +15,7 @@ import Tax from './pages/Tax'
 import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 import Platforms from './pages/Platforms'
+import Budget from './pages/Budget'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, initialized } = useAuthStore()
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="tax" element={<Tax />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="budget" element={<Budget />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

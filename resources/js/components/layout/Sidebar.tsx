@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../../utils/cn'
 import {
   LayoutDashboard, Package, CreditCard, History, TrendingUp,
-  Bell, FileText, Scale, Settings, ChevronRight, Landmark, Building2
+  Bell, FileText, Scale, Settings, ChevronRight, Landmark, Building2, Wallet
 } from 'lucide-react'
 import { useQuery } from '../../hooks/useQuery'
 import { remindersApi } from '../../api/reminders'
@@ -14,6 +14,7 @@ const navItems = [
   { to: '/liabilities',label: 'Passifs/Crédits', icon: CreditCard },
   { to: '/history',    label: 'Historique',       icon: History },
   { to: '/income',     label: 'Revenus',          icon: TrendingUp },
+  { to: '/budget',    label: 'Budget',            icon: Wallet },
   { to: '/reminders',  label: 'Rappels',          icon: Bell, badge: true },
   { to: '/tax',        label: 'Fiscalité',        icon: Scale },
   { to: '/reports',    label: 'Rapports',         icon: FileText },
